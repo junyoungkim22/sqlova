@@ -2,5 +2,8 @@ sqlova/**/*.pyc
 wikisql/**/*.pyc
 sqlnet/__pycache__
 bert/__pycache__
+__pycache__/
+bert_and_wikisql/
+data/
 .idea
 *.swp

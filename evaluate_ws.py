@@ -21,22 +21,25 @@ if __name__ == '__main__':
     saved_epoch = 'best'  # 30-162
 
     # Set path
-    path_h = '/home/wonseok' # change to your home folder
-    path_wikisql_tok = os.path.join(path_h, 'data', 'wikisql_tok')
+    #path_h = '/home/wonseok' # change to your home folder
+    path_h = '.' # change to your home folder
+    #path_wikisql_tok = os.path.join(path_h, 'data', 'wikisql_tok')
+    path_wikisql_tok = os.path.join(path_h, 'bert_and_wikisql', 'wikisql_tok')
     path_save_analysis = '.'
 
     # Path for evaluation results.
-    path_wikisql0 = os.path.join(path_h,'data/WikiSQL-1.1/data')
+    #path_wikisql0 = os.path.join(path_h,'data/WikiSQL-1.1/data')
+    path_wikisql0 = os.path.join(path_h, 'bert_and_wikisql', 'wikisql')
     path_source = os.path.join(path_wikisql0, f'{mode}.jsonl')
     path_db = os.path.join(path_wikisql0, f'{mode}.db')
-    path_pred = os.path.join(path_save_analysis, f'results_{mode}.jsonl')
+    #path_pred = os.path.join(path_save_analysis, f'results_{mode}.jsonl')
 
 
     # For the case when use "argument"
     parser = ArgumentParser()
     parser.add_argument('--source_file', help='source file for the prediction', default=path_source)
     parser.add_argument('--db_file', help='source database for the prediction', default=path_db)
-    parser.add_argument('--pred_file', help='predictions by the model', default=path_pred)
+    parser.add_argument('--pred_file', help='predictions by the model')
     parser.add_argument('--ordered', action='store_true', help='whether the exact match should consider the order of conditions')
     args = parser.parse_args()
     args.ordered=ordered
@@ -45,7 +48,7 @@ if __name__ == '__main__':
     exact_match = []
     with open(args.source_file) as fs, open(args.pred_file) as fp:
         grades = []
-        for ls, lp in tqdm(zip(fs, fp), total=count_lines(args.source_file)):
+        for ls, lp in tqdm(zip(fs, fp), total=count_lines(args.pred_file)):
             eg = json.loads(ls)
             ep = json.loads(lp)
             qg = Query.from_dict(eg['sql'], ordered=args.ordered)

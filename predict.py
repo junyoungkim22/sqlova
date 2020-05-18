@@ -34,6 +34,7 @@ import argparse, os
 from sqlnet.dbengine import DBEngine
 from sqlova.utils.utils_wikisql import *
 from train import construct_hyper_param, get_models
+from tqdm import tqdm
 
 # This is a stripped down version of the test() method in train.py - identical, except:
 #   - does not attempt to measure accuracy and indeed does not expect the data to be labelled.
@@ -49,7 +50,7 @@ def predict(data_loader, data_table, model, model_bert, bert_config, tokenizer,
 
     engine = DBEngine(os.path.join(path_db, f"{dset_name}.db"))
     results = []
-    for iB, t in enumerate(data_loader):
+    for iB, t in enumerate(tqdm(data_loader)):
         nlu, nlu_t, sql_i, sql_q, sql_t, tb, hs_t, hds = get_fields(t, data_table, no_hs_t=True, no_sql_t=True)
         g_sc, g_sa, g_wn, g_wc, g_wo, g_wv = get_g(sql_i)
         g_wvi_corenlp = get_g_wvi_corenlp(t)
@@ -91,20 +92,25 @@ def predict(data_loader, data_table, model, model_bert, bert_config, tokenizer,
 
 ## Set up hyper parameters and paths
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_file", required=True, help='model file to use (e.g. model_best.pt)')
-parser.add_argument("--bert_model_file", required=True, help='bert model file to use (e.g. model_bert_best.pt)')
+#parser.add_argument("--model_file", required=True, help='model file to use (e.g. model_best.pt)')
+#parser.add_argument("--bert_model_file", required=True, help='bert model file to use (e.g. model_bert_best.pt)')
 parser.add_argument("--bert_path", required=True, help='path to bert files (bert_config*.json etc)')
 parser.add_argument("--data_path", required=True, help='path to *.jsonl and *.db files')
 parser.add_argument("--split", required=True, help='prefix of jsonl and db files (e.g. dev)')
-parser.add_argument("--result_path", required=True, help='directory in which to place results')
+#parser.add_argument("--result_path", required=True, help='directory in which to place results')
+#parser.add_argument("--model_dir", required=True, help='directory with models (model_best.pt, model_bert_best.pt)')
 args = construct_hyper_param(parser)
 
 BERT_PT_PATH = args.bert_path
-path_save_for_evaluation = args.result_path
+#path_save_for_evaluation = args.result_path
+path_save_for_evaluation = args.data_path
 
 # Load pre-trained models
-path_model_bert = args.bert_model_file
-path_model = args.model_file
+#path_model_bert = args.bert_model_file
+#path_model = args.model_file
+path_model_bert = os.path.join(args.data_path, 'model_bert_best.pt')
+path_model = os.path.join(args.data_path, 'model_best.pt')
+path_db = os.path.join('data_and_model', 'wikisql')
 args.no_pretraining = True  # counterintuitive, but avoids loading unused models
 model, model_bert, tokenizer, bert_config = get_models(args, BERT_PT_PATH, trained=True, path_model_bert=path_model_bert, path_model=path_model)
 
@@ -129,7 +135,7 @@ with torch.no_grad():
                       args.max_seq_length,
                       args.num_target_layers,
                       detail=False,
-                      path_db=args.data_path,
+                      path_db=path_db,
                       st_pos=0,
                       dset_name=args.split, EG=args.EG)
 

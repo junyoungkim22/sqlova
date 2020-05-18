@@ -6,6 +6,7 @@
 
 
 import os, sys, argparse, re, json
+from tqdm import tqdm
 
 from matplotlib.pylab import *
 import torch.nn as nn
@@ -63,7 +64,7 @@ def construct_hyper_param(parser):
                         default=42,
                         help="random seed for initialization")
     parser.add_argument('--no_pretraining', action='store_true', help='Use BERT pretrained model')
-    parser.add_argument("--bert_type_abb", default='uS', type=str,
+    parser.add_argument("--bert_type_abb", default='uL', type=str,
                         help="Type of BERT model to load. e.g.) uS, uL, cS, cL, and mcS")
 
     # 1.3 Seq-to-SQL module parameters
@@ -81,6 +82,9 @@ def construct_hyper_param(parser):
                         type=int,
                         default=4,
                         help="The size of beam for smart decoding")
+
+    # 1.5 Input data paramater
+    parser.add_argument('--input', type=str)
 
     args = parser.parse_args()
 
@@ -226,7 +230,7 @@ def train(train_loader, train_table, model, model_bert, opt, bert_config, tokeni
     # Engine for SQL querying.
     engine = DBEngine(os.path.join(path_db, f"{dset_name}.db"))
 
-    for iB, t in enumerate(train_loader):
+    for iB, t in enumerate(tqdm(train_loader)):
         cnt += len(t)
 
         if cnt < st_pos:
@@ -419,7 +423,7 @@ def test(data_loader, data_table, model, model_bert, bert_config, tokenizer,
 
     engine = DBEngine(os.path.join(path_db, f"{dset_name}.db"))
     results = []
-    for iB, t in enumerate(data_loader):
+    for iB, t in enumerate(tqdm(data_loader)):
 
         cnt += len(t)
         if cnt < st_pos:
@@ -645,15 +649,20 @@ if __name__ == '__main__':
     args = construct_hyper_param(parser)
 
     ## 2. Paths
-    path_h = './data_and_model'  # '/home/wonseok'
-    path_wikisql = './data_and_model'  # os.path.join(path_h, 'data', 'wikisql_tok')
-    BERT_PT_PATH = path_wikisql
+    path_h = '.'  # '/home/wonseok'
+    #path_wikisql = './data_and_model'  # os.path.join(path_h, 'data', 'wikisql_tok')
+    #path_wikisql = os.path.join(path_h, 'wikisql_tok')
+    path_input = args.input
+    path_db = os.path.join(path_h, 'bert_and_wikisql', 'wikisql')
+    #BERT_PT_PATH = path_wikisql
+    BERT_PT_PATH = os.path.join(path_h, 'bert_and_wikisql')
 
-    path_save_for_evaluation = './'
+    path_save_for_evaluation = args.input
 
     ## 3. Load data
 
-    train_data, train_table, dev_data, dev_table, train_loader, dev_loader = get_data(path_wikisql, args)
+    #train_data, train_table, dev_data, dev_table, train_loader, dev_loader = get_data(path_wikisql, args)
+    train_data, train_table, dev_data, dev_table, train_loader, dev_loader = get_data(path_input, args)
     # test_data, test_table = load_wikisql_data(path_wikisql, mode='test', toy_model=args.toy_model, toy_size=args.toy_size, no_hs_tok=True)
     # test_loader = torch.utils.data.DataLoader(
     #     batch_size=args.bS,
@@ -693,7 +702,7 @@ if __name__ == '__main__':
                                              args.accumulate_gradients,
                                              opt_bert=opt_bert,
                                              st_pos=0,
-                                             path_db=path_wikisql,
+                                             path_db=path_db,
                                              dset_name='train')
 
             # check DEV
@@ -707,7 +716,7 @@ if __name__ == '__main__':
                                                       args.max_seq_length,
                                                       args.num_target_layers,
                                                       detail=False,
-                                                      path_db=path_wikisql,
+                                                      path_db=path_db,
                                                       st_pos=0,
                                                       dset_name='dev', EG=args.EG)
 
@@ -725,10 +734,10 @@ if __name__ == '__main__':
                 epoch_best = epoch
                 # save best model
                 state = {'model': model.state_dict()}
-                torch.save(state, os.path.join('.', 'model_best.pt'))
+                torch.save(state, os.path.join(path_input, 'model_best.pt'))
 
                 state = {'model_bert': model_bert.state_dict()}
-                torch.save(state, os.path.join('.', 'model_bert_best.pt'))
+                torch.save(state, os.path.join(path_input, 'model_bert_best.pt'))
 
             print(f" Best Dev lx acc: {acc_lx_t_best} at epoch: {epoch_best}")
 
