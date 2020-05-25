@@ -110,12 +110,12 @@ path_save_for_evaluation = args.data_path
 #path_model = args.model_file
 path_model_bert = os.path.join(args.data_path, 'model_bert_best.pt')
 path_model = os.path.join(args.data_path, 'model_best.pt')
-path_db = os.path.join('data_and_model', 'wikisql')
+path_db = os.path.join('bert_and_wikisql', 'wikisql')
 args.no_pretraining = True  # counterintuitive, but avoids loading unused models
 model, model_bert, tokenizer, bert_config = get_models(args, BERT_PT_PATH, trained=True, path_model_bert=path_model_bert, path_model=path_model)
 
 # Load data
-dev_data, dev_table = load_wikisql_data(args.data_path, mode=args.split, toy_model=args.toy_model, toy_size=args.toy_size, no_hs_tok=True)
+dev_data, dev_table = load_wikisql_data(os.path.join('bert_and_wikisql', 'wikisql_tok'), mode=args.split, toy_model=args.toy_model, toy_size=args.toy_size, no_hs_tok=True)
 dev_loader = torch.utils.data.DataLoader(
     batch_size=args.bS,
     dataset=dev_data,

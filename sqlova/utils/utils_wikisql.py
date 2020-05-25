@@ -28,7 +28,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def load_wikisql(path_wikisql, toy_model, toy_size, bert=False, no_w2i=False, no_hs_tok=False, aug=False):
     # Get data
     train_data, train_table = load_wikisql_data(path_wikisql, mode='train', toy_model=toy_model, toy_size=toy_size, no_hs_tok=no_hs_tok, aug=aug)
-    dev_data, dev_table = load_wikisql_data(path_wikisql, mode='dev', toy_model=toy_model, toy_size=toy_size, no_hs_tok=no_hs_tok)
+    dev_path = os.path.join('bert_and_wikisql', 'wikisql')
+    dev_data, dev_table = load_wikisql_data(dev_path, mode='dev', toy_model=toy_model, toy_size=toy_size, no_hs_tok=no_hs_tok)
 
 
     # Get word vector

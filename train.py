@@ -248,11 +248,14 @@ def train(train_loader, train_table, model, model_bert, opt, bert_config, tokeni
         g_sc, g_sa, g_wn, g_wc, g_wo, g_wv = get_g(sql_i)
         # get ground truth where-value index under CoreNLP tokenization scheme. It's done already on trainset.
         g_wvi_corenlp = get_g_wvi_corenlp(t)
-
-        wemb_n, wemb_h, l_n, l_hpu, l_hs, \
-        nlu_tt, t_to_tt_idx, tt_to_t_idx \
-            = get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length,
-                            num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
+        
+        try:
+            wemb_n, wemb_h, l_n, l_hpu, l_hs, \
+            nlu_tt, t_to_tt_idx, tt_to_t_idx \
+                = get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length,
+                                num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
+        except:
+            print("Error on bert")
 
         # wemb_n: natural language embedding
         # wemb_h: header embedding
@@ -269,9 +272,9 @@ def train(train_loader, train_table, model, model_bert, opt, bert_config, tokeni
             # e.g. train: 32.
             continue
 
-        # score
         s_sc, s_sa, s_wn, s_wc, s_wo, s_wv = model(wemb_n, l_n, wemb_h, l_hpu, l_hs,
                                                    g_sc=g_sc, g_sa=g_sa, g_wn=g_wn, g_wc=g_wc, g_wvi=g_wvi)
+
 
         # Calculate loss & step
         loss = Loss_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, g_sc, g_sa, g_wn, g_wc, g_wo, g_wvi)
