@@ -51,7 +51,10 @@ def load_wikisql_data(path_wikisql, mode='train', toy_model=False, toy_size=10, 
 
     path_sql = os.path.join(path_wikisql, mode+'_tok.jsonl')
     if no_hs_tok:
-        path_table = os.path.join(path_wikisql, mode + '.tables.jsonl')
+        if mode is 'train':
+            path_table = os.path.join('bert_and_wikisql', 'wikisql', 'train.tables.jsonl')
+        else:
+            path_table = os.path.join(path_wikisql, mode + '.tables.jsonl')
     else:
         path_table = os.path.join(path_wikisql, mode+'_tok.tables.jsonl')
 

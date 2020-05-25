@@ -248,7 +248,7 @@ def train(train_loader, train_table, model, model_bert, opt, bert_config, tokeni
         g_sc, g_sa, g_wn, g_wc, g_wo, g_wv = get_g(sql_i)
         # get ground truth where-value index under CoreNLP tokenization scheme. It's done already on trainset.
         g_wvi_corenlp = get_g_wvi_corenlp(t)
-        
+
         try:
             wemb_n, wemb_h, l_n, l_hpu, l_hs, \
             nlu_tt, t_to_tt_idx, tt_to_t_idx \
@@ -661,6 +661,14 @@ if __name__ == '__main__':
     BERT_PT_PATH = os.path.join(path_h, 'bert_and_wikisql')
 
     path_save_for_evaluation = args.input
+
+    args_file = open(os.path.join(args.input, 'args.txt'), 'w')
+
+    for key, value in vars(args).items():
+        args_file.write(f'{key}:{value}\n')
+
+    args_file.close()
+
 
     ## 3. Load data
 
