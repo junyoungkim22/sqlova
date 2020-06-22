@@ -256,6 +256,7 @@ def train(train_loader, train_table, model, model_bert, opt, bert_config, tokeni
                                 num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
         except:
             print("Error on bert")
+            continue
 
         # wemb_n: natural language embedding
         # wemb_h: header embedding
