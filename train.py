@@ -254,8 +254,9 @@ def train(train_loader, train_table, model, model_bert, opt, bert_config, tokeni
             nlu_tt, t_to_tt_idx, tt_to_t_idx \
                 = get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length,
                                 num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
-        except:
+        except Exception as e:
             print("Error on bert")
+            print(e)
             continue
 
         # wemb_n: natural language embedding
@@ -271,8 +272,11 @@ def train(train_loader, train_table, model, model_bert, opt, bert_config, tokeni
             # In this case, that train example is not used.
             # During test, that example considered as wrongly answered.
             # e.g. train: 32.
+            print("Error on bert")
             continue
 
+        if 0 in l_hpu:
+            continue
         s_sc, s_sa, s_wn, s_wc, s_wo, s_wv = model(wemb_n, l_n, wemb_h, l_hpu, l_hs,
                                                    g_sc=g_sc, g_sa=g_sa, g_wn=g_wn, g_wc=g_wc, g_wvi=g_wvi)
 
